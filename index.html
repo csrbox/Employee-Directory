@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Directory — CSRBOX Group</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Chart.js -- pinned to a known-stable published version -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- Chart.js DataLabels Plugin -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+
+  <!-- PapaParse for robust CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css?v=2.1">
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- ============ SIDEBAR / TOP BAR ============ -->
+    <nav class="side-nav" id="sideNav">
+      <div class="brand">
+        <div class="brand-logo-wrap">
+          <img src="logos/csrbox-logo.png" onerror="this.onerror=null; this.src='logos/csrbox-logo.svg';"
+            class="brand-logo-img" alt="CSRBOX" />
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Employee Directory</span>
+          <span class="brand-sub">CSRBOX Group</span>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a href="#/dashboard" class="nav-link" data-route="dashboard">
+          <span class="nav-icon">📊</span><span class="nav-label">Overview</span>
+        </a>
+        <a href="#/directory" class="nav-link" data-route="directory">
+          <span class="nav-icon">📇</span><span class="nav-label">Directory</span>
+        </a>
+        <a href="#/profile" class="nav-link" data-route="profile">
+          <span class="nav-icon">🪪</span><span class="nav-label">Profile</span>
+        </a>
+      </div>
+
+      <div class="nav-footer">
+        <span id="dataStamp">Loading data…</span>
+      </div>
+    </nav>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content">
+
+      <!-- ---------------- OVERVIEW / DASHBOARD VIEW ---------------- -->
+      <section id="view-dashboard" class="view">
+        <header class="view-header gradient-header">
+          <h1>👋 Team Overview</h1>
+          <p class="view-sub">A live read of who's on the team, where, and how they work.</p>
+        </header>
+
+        <!-- KPI strip -->
+        <div class="kpi-strip" id="kpiStrip">
+          <div class="kpi">
+            <span class="kpi-emoji" style="background:#E7F1FB;">👥</span>
+            <div class="kpi-text">
+              <span class="kpi-value" id="kpiTotal">–</span>
+              <span class="kpi-label">Employees</span>
+            </div>
+          </div>
+          <div class="kpi">
+            <span class="kpi-emoji" style="background:#EEF7E2;">🏢</span>
+            <div class="kpi-text">
+              <span class="kpi-value" id="kpiOrgs">–</span>
+              <span class="kpi-label">Organisations</span>
+            </div>
+          </div>
+          <div class="kpi">
+            <span class="kpi-emoji" style="background:#E3F5F3;">📍</span>
+            <div class="kpi-text">
+              <span class="kpi-value" id="kpiLocations">–</span>
+              <span class="kpi-label">Locations</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts grid -->
+        <div class="chart-grid" id="chartGrid">
+          <div class="chart-card chart-card-wide" style="--accent:#1B75BC;">
+            <div class="chart-card-header">
+              <h3>🏢 Headcount by organisation</h3>
+              <span class="chart-scroll-hint">Click bar to view list</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartOrg" width="600" height="230"></canvas></div>
+          </div>
+
+          <div class="chart-card" style="--accent:#8DC63F;">
+            <h3>💼 Work mode</h3>
+            <div class="chart-canvas-wrap"><canvas id="chartWorkMode" width="400" height="230"></canvas></div>
+          </div>
+
+          <div class="chart-card" style="--accent:#2CA6A4;">
+            <div class="chart-card-header">
+              <h3>🪪 Designation Mix</h3>
+              <span class="chart-scroll-hint" id="levelCountBadge">Scrollable ↕</span>
+            </div>
+            <div class="chart-scroll-wrap">
+              <div class="chart-canvas-wrap chart-canvas-dynamic" id="wrapChartLevel">
+                <canvas id="chartLevel"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card" style="--accent:#F2A93B;">
+            <div class="chart-card-header">
+              <h3>⏳ Experience distribution with CSRBOX</h3>
+              <span class="chart-scroll-hint">Click bar to view list</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartTenure" width="400" height="230"></canvas></div>
+          </div>
+
+          <div class="chart-card" style="--accent:#E4572E;">
+            <div class="chart-card-header">
+              <h3>📍 Top locations</h3>
+              <span class="chart-scroll-hint" id="locationCountBadge">Scrollable ↕</span>
+            </div>
+            <div class="chart-scroll-wrap">
+              <div class="chart-canvas-wrap chart-canvas-dynamic" id="wrapChartLocation">
+                <canvas id="chartLocation"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card chart-card-wide" style="--accent:#6C63FF;">
+            <div class="chart-card-header">
+              <h3>📈 Joining trend</h3>
+              <span class="chart-scroll-hint">Click point to view list</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartJoining" width="600" height="230"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- DIRECTORY VIEW ---------------- -->
+      <section id="view-directory" class="view" style="display:none;">
+        <header class="view-header gradient-header">
+          <h1>📇 Directory</h1>
+          <p class="view-sub">Search or filter to find anyone on the team — tap a row to open their profile.</p>
+        </header>
+
+        <div class="filter-bar">
+          <input type="text" id="searchName" class="filter-input filter-input-wide" placeholder="🔎 Search by name…">
+          <select id="filterOrg" class="filter-input">
+            <option value="">🏢 Organisation</option>
+          </select>
+          <select id="filterLocation" class="filter-input">
+            <option value="">📍 Location</option>
+          </select>
+          <select id="filterLevel" class="filter-input">
+            <option value="">🪪 Designation</option>
+          </select>
+          <button id="clearFilters" class="filter-clear">✕ Clear</button>
+        </div>
+
+        <p class="result-count" id="resultCount"></p>
+
+        <div class="table-wrap">
+          <table class="emp-table" id="empTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Organisation</th>
+                <th>Location</th>
+                <th>Work mode</th>
+                <th>Email</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="empTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------------- PROFILE VIEW ---------------- -->
+      <section id="view-profile" class="view" style="display:none;">
+        <header class="view-header gradient-header">
+          <h1>🪪 Employee Profile</h1>
+          <p class="view-sub">Pick anyone from the team to see their full profile.</p>
+        </header>
+
+        <div class="filter-bar profile-filter-bar">
+          <input type="text" id="profileSearchName" class="filter-input filter-input-wide"
+            placeholder="🔎 Search employee by name, ID, title…" autocomplete="off">
+          <select id="profileFilterOrg" class="filter-input">
+            <option value="">🏢 Organisation</option>
+          </select>
+          <select id="profileFilterLocation" class="filter-input">
+            <option value="">📍 Location</option>
+          </select>
+          <select id="profileFilterLevel" class="filter-input">
+            <option value="">🪪 Designation</option>
+          </select>
+          <select id="profileSelectEmployee" class="filter-input filter-input-wide">
+            <option value="">👤 Select employee…</option>
+          </select>
+          <button id="profileClearFilters" class="filter-clear">✕ Clear</button>
+        </div>
+
+        <div id="profileContent"></div>
+      </section>
+
+      <!-- ============ APP FOOTER (7 LOGOS) ============ -->
+      <footer class="app-footer">
+        <div class="footer-logos-track">
+          <div class="footer-logo-item" title="CSRBOX">
+            <img src="logos/csrbox.png" onerror="this.onerror=null; this.src='logos/csrbox.svg';" alt="CSRBOX" />
+          </div>
+          <div class="footer-logo-item" title="Bharat Cares">
+            <img src="logos/bharat-cares.png" onerror="this.onerror=null; this.src='logos/bharat-cares.svg';"
+              alt="Bharat Cares" />
+          </div>
+          <div class="footer-logo-item" title="Impact Practice">
+            <img src="logos/impact-practice.png" onerror="this.onerror=null; this.src='logos/impact-practice.svg';"
+              alt="Impact Practice" />
+          </div>
+          <div class="footer-logo-item" title="IndiGive Foundation">
+            <img src="logos/indigive.png" onerror="this.onerror=null; this.src='logos/indigive.svg';"
+              alt="IndiGive Foundation" />
+          </div>
+          <div class="footer-logo-item" title="The Godavari Initiative">
+            <img src="logos/godavari.png" onerror="this.onerror=null; this.src='logos/godavari.svg';"
+              alt="The Godavari Initiative" />
+          </div>
+          <div class="footer-logo-item" title="One Purpose">
+            <img src="logos/one-purpose.png" onerror="this.onerror=null; this.src='logos/one-purpose.svg';"
+              alt="One Purpose" />
+          </div>
+          <div class="footer-logo-item" title="Scholars Box">
+            <img src="logos/scholars-box.png" onerror="this.onerror=null; this.src='logos/scholars-box.svg';"
+              alt="Scholars Box" />
+          </div>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ============ DRILL-DOWN MODAL ============ -->
+  <div id="drillDownModal" class="drilldown-modal-backdrop" style="display: none;" aria-hidden="true">
+    <div class="drilldown-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="drilldown-modal-header">
+        <div class="drilldown-header-title-wrap">
+          <h3 id="modalTitle" class="drilldown-modal-title">Employees</h3>
+          <span id="modalCountBadge" class="drilldown-count-badge">0 Employees</span>
+        </div>
+        <button id="modalCloseBtn" class="drilldown-close-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="drilldown-modal-toolbar">
+        <input type="text" id="modalSearchInput" class="drilldown-search-input" placeholder="🔎 Search in this list…" autocomplete="off" />
+        <span id="modalShowingCount" class="drilldown-showing-count"></span>
+      </div>
+
+      <div class="drilldown-table-wrap">
+        <table class="drilldown-table" id="modalTable">
+          <thead id="modalTableHead"></thead>
+          <tbody id="modalTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/directory.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/router.js"></script>
+</body>
+
+</html>
