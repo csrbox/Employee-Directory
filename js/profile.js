@@ -230,6 +230,11 @@ function renderProfileDetail(emp) {
     ? emp.keySkills.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
+  const rawGender = (emp.gender || "").trim();
+  const hasGender = rawGender && rawGender.toLowerCase() !== "unspecified";
+  const genderIcon = rawGender.toLowerCase().startsWith("f") ? "♀️" : (rawGender.toLowerCase().startsWith("m") ? "♂️" : "👤");
+  const genderDisplay = hasGender ? rawGender : "Unspecified";
+
   container.innerHTML = `
     <div class="profile-header">
       <div class="profile-avatar">${initials}</div>
@@ -237,7 +242,10 @@ function renderProfileDetail(emp) {
         <h2>${escapeHtml(emp.fullName)}</h2>
         <p>${escapeHtml(emp.designation)} · ${escapeHtml(emp.organisation)} · ${escapeHtml(emp.empId)}</p>
       </div>
-      <span class="status-pill ${isActive ? "" : "inactive"}">${isActive ? "✅" : "⏸️"} ${escapeHtml(emp.status)}</span>
+      <div class="profile-header-badges">
+        <span class="gender-pill ${hasGender ? "" : "unspecified"}">${genderIcon} ${escapeHtml(genderDisplay)}</span>
+        <span class="status-pill ${isActive ? "" : "inactive"}">${isActive ? "✅" : "⏸️"} ${escapeHtml(emp.status)}</span>
+      </div>
     </div>
 
     <div class="profile-grid">

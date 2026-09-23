@@ -26,6 +26,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+
   <link rel="stylesheet" href="css/style.css?v=2.1">
 </head>
 
@@ -159,20 +162,15 @@
           <div class="chart-card" style="--accent:#1B75BC;" id="cardIndiaMap">
             <div class="chart-card-header">
               <div>
-                <h3 style="display:inline-block; margin-right:6px;">🇮🇳 India Map</h3>
-                <span class="chart-scroll-hint">Click marker to view</span>
-              </div>
-              <div class="map-layer-switch" id="mapLayerSwitch">
-                <button type="button" class="btn-map-layer active" data-layer="satellite" id="btnMapSatellite"
-                  title="Satellite imagery">🛰️ Satellite</button>
-                <button type="button" class="btn-map-layer" data-layer="streets" id="btnMapStreets"
-                  title="Street map">🗺️ Streets</button>
+                <h3 style="display:inline-block; margin-right:6px;">📍 Employee Locations</h3>
+                <span class="chart-scroll-hint">Click a marker to view employees</span>
               </div>
             </div>
             <div id="indiaMapWrap" class="map-container-wrap map-container-tall">
               <div id="indiaMap"></div>
             </div>
           </div>
+
 
           <!--
           <div class="chart-card chart-card-wide" style="--accent:#6C63FF;">

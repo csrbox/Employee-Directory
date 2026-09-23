@@ -818,17 +818,34 @@ function getCoordinatesForLocation(locStr) {
   const lngOffset = ((Math.abs(hash >> 5) % 40) - 20) * 0.12;
   return [22.5 + latOffset, 78.5 + lngOffset];
 }
+// Active map circle markers
+let mapCircleMarkers = [];
 
-// Current active basemap layer type
-let currentMapLayerType = "satellite";
-let activeBaseLayers = [];
-let activeMaskLayer = null;
-let mapMarkerList = [];
+// Palette for top locations matching the user's reference
+const LOCATION_COLOR_PALETTE = [
+  "#2563EB", // Ahmedabad (Bright Blue)
+  "#F97316", // Delhi (Orange)
+  "#8B5CF6", // Bangalore (Purple)
+  "#84CC16", // Pune (Green)
+  "#06B6D4", // Lucknow (Cyan)
+  "#EAB308", // Mumbai (Yellow/Amber)
+  "#EC4899", // Hyderabad (Pink)
+  "#6366F1", // Nashik (Indigo)
+  "#14B8A6", // Dungarpur (Teal)
+  "#F43F5E", // Vadodara (Rose)
+  "#A855F7", // Kolkata (Violet)
+  "#F59E0B", // Surat (Amber)
+  "#10B981", // Guwahati (Emerald)
+  "#0EA5E9", // Bhubaneshwar (Sky Blue)
+  "#D946EF", // Noida (Fuchsia)
+  "#64748B", // Fallback Slate
+];
 
 function renderIndiaMap(data) {
   const container = document.getElementById("indiaMap");
   if (!container || typeof L === "undefined") return;
 
+  // Aggregate headcount per map location
   const locationCounts = {};
   data.forEach((d) => {
     if (!d.empId) return;
@@ -836,6 +853,7 @@ function renderIndiaMap(data) {
     locationCounts[loc] = (locationCounts[loc] || 0) + 1;
   });
 
+  // Reset existing Leaflet instance safely
   if (leafletMapInstance) {
     leafletMapInstance.remove();
     leafletMapInstance = null;
@@ -855,147 +873,62 @@ function renderIndiaMap(data) {
     center: [22.5, 80.0],
     zoom: 4.6,
     minZoom: 4.2,
-    maxZoom: 12,
+    maxZoom: 16,
     maxBounds: maxBounds,
-    maxBoundsViscosity: 1.0, // Strictly keep user inside India viewport
+    maxBoundsViscosity: 1.0,
     zoomSnap: 0.25,
     scrollWheelZoom: false,
     zoomControl: true,
+    attributionControl: false,
   });
   window.leafletMapInstance = leafletMapInstance;
 
-  // Fit view strictly to India
   leafletMapInstance.fitBounds(indiaBounds, { padding: [10, 10] });
 
-  // Function to apply basemap tiles
-  function setMapBasemap(type) {
-    currentMapLayerType = type;
-    // Clear existing basemap layers
-    activeBaseLayers.forEach((l) => leafletMapInstance.removeLayer(l));
-    activeBaseLayers = [];
+  // 100% Free Google Maps Basemap (No API Key Required, No Watermarks)
+  L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+    subdomains: ["0", "1", "2", "3"],
+    maxZoom: 20,
+  }).addTo(leafletMapInstance);
 
-    if (type === "satellite") {
-      // 100% Free ArcGIS World Imagery Satellite - NO API Key, NO watermark
-      const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: 'Tiles &copy; Esri &mdash; Satellite',
-        maxZoom: 19,
-      }).addTo(leafletMapInstance);
-
-      // Boundaries & City Labels overlay
-      const labelLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19,
-      }).addTo(leafletMapInstance);
-
-      activeBaseLayers.push(satLayer, labelLayer);
-    } else {
-      // Free OpenStreetMap Standard - Streets
-      const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19,
-      }).addTo(leafletMapInstance);
-
-      activeBaseLayers.push(osmLayer);
-    }
-
-    // Update mask layer style to match basemap theme
-    if (activeMaskLayer) {
-      if (type === "satellite") {
-        activeMaskLayer.setStyle({
-          fillColor: "#0B1120",
-          fillOpacity: 0.94,
-          color: "#F59E0B", // Glowing Amber/Gold India Border
-          weight: 2,
-        });
-      } else {
-        activeMaskLayer.setStyle({
-          fillColor: "#F1F5F9",
-          fillOpacity: 0.90,
-          color: "#1B75BC", // Brand Blue India Border
-          weight: 2,
-        });
-      }
-    }
-
-    // Update marker styling
-    mapMarkerList.forEach(({ marker }) => {
-      if (type === "satellite") {
-        marker.setStyle({
-          fillColor: "#F59E0B",
-          color: "#FFFFFF",
-          weight: 2.2,
-          fillOpacity: 0.92,
-        });
-      } else {
-        marker.setStyle({
-          fillColor: "#1B75BC",
-          color: "#FFFFFF",
-          weight: 2,
-          fillOpacity: 0.85,
-        });
-      }
-    });
-
-    // Bring mask and markers to front above tile layer
-    if (activeMaskLayer) activeMaskLayer.bringToFront();
-    mapMarkerList.forEach(({ marker }) => marker.bringToFront());
-  }
-
-  // Load and apply Inverted India Mask (masks out Pakistan, China, Nepal, oceans so ONLY India is drawn)
-  fetch("./data/india-mask.json")
-    .then((res) => {
-      if (!res.ok) throw new Error("Could not load india-mask.json");
-      return res.json();
-    })
-    .then((maskGeojson) => {
-      activeMaskLayer = L.geoJSON(maskGeojson, {
-        style: {
-          fillColor: currentMapLayerType === "satellite" ? "#0B1120" : "#F1F5F9",
-          fillOpacity: currentMapLayerType === "satellite" ? 0.94 : 0.90,
-          color: currentMapLayerType === "satellite" ? "#F59E0B" : "#1B75BC",
-          weight: 2,
-          opacity: 1,
-        },
-        interactive: false,
-      }).addTo(leafletMapInstance);
-      activeMaskLayer.bringToFront();
-      mapMarkerList.forEach(({ marker }) => marker.bringToFront());
-    })
-    .catch((err) => {
-      console.warn("India boundary mask load note:", err.message);
-    });
-
-  // Apply default basemap (Satellite)
-  setMapBasemap("satellite");
-
-  // Render Circle Markers for every location
-  mapMarkerList = [];
   const entries = Object.entries(locationCounts);
   if (!entries.length) return;
 
+  // Sort locations by count descending
+  entries.sort((a, b) => b[1] - a[1]);
   const maxCount = Math.max(...entries.map((e) => e[1]), 1);
 
+  // Assign distinct colors to top locations
+  const locationColorMap = {};
+  entries.forEach(([locName], idx) => {
+    locationColorMap[locName] = LOCATION_COLOR_PALETTE[idx % LOCATION_COLOR_PALETTE.length];
+  });
+
+  mapCircleMarkers = [];
+
+  // Render colored location bubbles scaled by headcount (matching Google Maps reference)
   entries.forEach(([locName, count]) => {
     const coords = getCoordinatesForLocation(locName);
     if (!coords) return;
 
-    // Radius scaled between 6.5px and 24px
-    const radius = Math.max(6.5, Math.min(24, 6.5 + Math.sqrt(count / maxCount) * 17.5));
+    // Radius scaling: min 5px to max 28px
+    const minR = 5;
+    const maxR = 28;
+    const radius = Math.max(minR, Math.min(maxR, minR + Math.sqrt(count / maxCount) * (maxR - minR)));
+    const color = locationColorMap[locName] || "#3B82F6";
 
-    const isSat = currentMapLayerType === "satellite";
-    const defaultColor = isSat ? "#F59E0B" : "#1B75BC";
-
-    const marker = L.circleMarker(coords, {
+    const circle = L.circleMarker(coords, {
       radius: radius,
-      fillColor: defaultColor,
+      fillColor: color,
       color: "#FFFFFF",
-      weight: isSat ? 2.2 : 2,
-      opacity: 1,
-      fillOpacity: isSat ? 0.92 : 0.85,
-      className: "map-marker-pulse",
+      weight: 1.8,
+      opacity: 0.95,
+      fillOpacity: 0.72,
     }).addTo(leafletMapInstance);
 
-    marker.bindTooltip(
-      `<strong>📍 ${escapeHtmlLocal(locName)}</strong><br>${count} Employee${count !== 1 ? "s" : ""} (Click to view list)`,
+    // Tooltip
+    circle.bindTooltip(
+      `<strong>📍 ${escapeHtmlLocal(locName)}</strong><br>${count} Employee${count !== 1 ? "s" : ""} <span style="opacity:0.8;font-size:11px;">(Click to view list)</span>`,
       {
         direction: "top",
         offset: [0, -radius],
@@ -1003,17 +936,19 @@ function renderIndiaMap(data) {
       }
     );
 
-    marker.on("mouseover", () => {
-      marker.setStyle({ fillColor: "#EF4444", fillOpacity: 1, weight: 3 });
+    // Hover effect
+    circle.on("mouseover", () => {
+      circle.setStyle({ fillOpacity: 0.95, weight: 2.8 });
     });
-    marker.on("mouseout", () => {
-      const activeColor = currentMapLayerType === "satellite" ? "#F59E0B" : "#1B75BC";
-      marker.setStyle({ fillColor: activeColor, fillOpacity: currentMapLayerType === "satellite" ? 0.92 : 0.85, weight: 2 });
+    circle.on("mouseout", () => {
+      circle.setStyle({ fillOpacity: 0.72, weight: 1.8 });
     });
 
-    // Click marker opens Drill-Down Modal for that location (with Location column excluded)
-    marker.on("click", () => {
-      const filtered = data.filter((d) => (d.mapLocation || d.location || "Unspecified").trim() === locName);
+    // Click handler: opens existing Drill-Down Modal
+    circle.on("click", () => {
+      const filtered = data.filter(
+        (d) => (d.mapLocation || d.location || "Unspecified").trim() === locName
+      );
       openDrillDownModal({
         title: `📍 ${locName}`,
         badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
@@ -1030,27 +965,8 @@ function renderIndiaMap(data) {
       });
     });
 
-    mapMarkerList.push({ marker, locName, count });
+    mapCircleMarkers.push(circle);
   });
-
-  // Layer Switch Button Handlers
-  const btnSat = document.getElementById("btnMapSatellite");
-  const btnStr = document.getElementById("btnMapStreets");
-
-  if (btnSat && btnStr) {
-    btnSat.onclick = (e) => {
-      e.preventDefault();
-      btnSat.classList.add("active");
-      btnStr.classList.remove("active");
-      setMapBasemap("satellite");
-    };
-    btnStr.onclick = (e) => {
-      e.preventDefault();
-      btnStr.classList.add("active");
-      btnSat.classList.remove("active");
-      setMapBasemap("streets");
-    };
-  }
 
   setTimeout(() => {
     if (leafletMapInstance) {
