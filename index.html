@@ -22,6 +22,10 @@
   <!-- PapaParse for robust CSV parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
+  <!-- Leaflet.js for Interactive India Map -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
   <link rel="stylesheet" href="css/style.css?v=2.1">
 </head>
 
@@ -33,7 +37,7 @@
     <nav class="side-nav" id="sideNav">
       <div class="brand">
         <div class="brand-logo-wrap">
-          <img src="logos/csrbox-logo.png" onerror="this.onerror=null; this.src='logos/csrbox-logo.svg';"
+          <img src="logos/csrbox-logo.svg" onerror="this.onerror=null; this.src='logos/csrbox-logo.svg';"
             class="brand-logo-img" alt="CSRBOX" />
         </div>
         <div class="brand-text">
@@ -105,8 +109,19 @@
           </div>
 
           <div class="chart-card" style="--accent:#8DC63F;">
-            <h3>💼 Work mode</h3>
+            <div class="chart-card-header">
+              <h3>💼 Work mode</h3>
+              <span class="chart-scroll-hint">Click slice to view list</span>
+            </div>
             <div class="chart-canvas-wrap"><canvas id="chartWorkMode" width="400" height="230"></canvas></div>
+          </div>
+
+          <div class="chart-card" style="--accent:#EC4899;">
+            <div class="chart-card-header">
+              <h3>👤 Gender proportion</h3>
+              <span class="chart-scroll-hint">Click slice to view list</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartGender" width="400" height="230"></canvas></div>
           </div>
 
           <div class="chart-card" style="--accent:#2CA6A4;">
@@ -134,13 +149,32 @@
               <h3>📍 Top locations</h3>
               <span class="chart-scroll-hint" id="locationCountBadge">Scrollable ↕</span>
             </div>
-            <div class="chart-scroll-wrap">
+            <div class="chart-scroll-wrap chart-scroll-wrap-tall" id="wrapScrollLocation">
               <div class="chart-canvas-wrap chart-canvas-dynamic" id="wrapChartLocation">
                 <canvas id="chartLocation"></canvas>
               </div>
             </div>
           </div>
 
+          <div class="chart-card" style="--accent:#1B75BC;" id="cardIndiaMap">
+            <div class="chart-card-header">
+              <div>
+                <h3 style="display:inline-block; margin-right:6px;">🇮🇳 India Map</h3>
+                <span class="chart-scroll-hint">Click marker to view</span>
+              </div>
+              <div class="map-layer-switch" id="mapLayerSwitch">
+                <button type="button" class="btn-map-layer active" data-layer="satellite" id="btnMapSatellite"
+                  title="Satellite imagery">🛰️ Satellite</button>
+                <button type="button" class="btn-map-layer" data-layer="streets" id="btnMapStreets"
+                  title="Street map">🗺️ Streets</button>
+              </div>
+            </div>
+            <div id="indiaMapWrap" class="map-container-wrap map-container-tall">
+              <div id="indiaMap"></div>
+            </div>
+          </div>
+
+          <!--
           <div class="chart-card chart-card-wide" style="--accent:#6C63FF;">
             <div class="chart-card-header">
               <h3>📈 Joining trend</h3>
@@ -148,6 +182,7 @@
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartJoining" width="600" height="230"></canvas></div>
           </div>
+          -->
         </div>
       </section>
 
@@ -268,7 +303,8 @@
       </div>
 
       <div class="drilldown-modal-toolbar">
-        <input type="text" id="modalSearchInput" class="drilldown-search-input" placeholder="🔎 Search in this list…" autocomplete="off" />
+        <input type="text" id="modalSearchInput" class="drilldown-search-input" placeholder="🔎 Search in this list…"
+          autocomplete="off" />
         <span id="modalShowingCount" class="drilldown-showing-count"></span>
       </div>
 

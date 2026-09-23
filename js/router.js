@@ -22,6 +22,13 @@ function showView(name) {
     link.classList.toggle("active", link.dataset.route === name);
   });
 
+  if (name === "dashboard" && window.leafletMapInstance) {
+    setTimeout(() => {
+      window.leafletMapInstance.invalidateSize();
+      window.leafletMapInstance.fitBounds([[7.0, 68.0], [35.8, 97.5]], { padding: [10, 10] });
+    }, 150);
+  }
+
   window.scrollTo({ top: 0 });
 }
 

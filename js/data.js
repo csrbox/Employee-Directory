@@ -1,42 +1,47 @@
 /* =========================================================================
    data.js
    Single source of truth for employee data.
-   Connected directly to Google Sheets (Dashboard tab).
+   Connected to Google Apps Script Web App API.
    ========================================================================= */
 
-const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1O9SikyIiwm0xTZuAdEDvVBD3AZS3Ztku6e1A88CJahY/export?format=csv&gid=142552145";
-const LOCAL_FALLBACK_URL = "./data/employees.csv";
+
+const API_URL = "https://script.google.com/macros/s/AKfycby-N3PuiQcR49JSmPVUNCPHqPtGZl7WMeGlfGGXJwSCdssv-zJp99x78JHaLi0AyFLDQw/exec";
 
 let employeeData = []; // shared array every render function reads from
 
 /**
- * Loads and parses the live Google Sheet CSV, normalizes field names/types,
- * then triggers every view's render functions.
+ * Loads employee data from Google Apps Script Web App API,
+ * normalizes field names/types, and fires the data:ready event.
  */
 async function loadEmployeeData() {
   try {
-    let response;
-    let isLive = true;
-
-    try {
-      response = await fetch(GOOGLE_SHEET_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error("Google Sheet HTTP status " + response.status);
-    } catch (sheetErr) {
-      console.warn("Could not fetch Google Sheet, trying local fallback:", sheetErr);
-      isLive = false;
-      response = await fetch(LOCAL_FALLBACK_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error("Network response was not ok (" + response.status + ")");
+    if (!API_URL || API_URL === "") {
+      throw new Error("Apps Script API URL is not configured. Please set API_URL in js/data.js.");
     }
 
-    const csvText = await response.text();
-
-    const parsed = Papa.parse(csvText, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (h) => h.trim(),
+    const response = await fetch(API_URL, {
+      cache: "no-store",
     });
 
-    employeeData = parsed.data.map(normalizeEmployeeRow).filter((row) => row.empId);
+    if (!response.ok) {
+      throw new Error("API responded with HTTP status " + response.status);
+    }
+
+    const result = await response.json();
+
+    // Validate API response structure
+    let rawList = [];
+    if (Array.isArray(result)) {
+      rawList = result;
+    } else if (result && Array.isArray(result.data)) {
+      rawList = result.data;
+    } else if (result && result.error) {
+      throw new Error("API error: " + result.error);
+    } else {
+      throw new Error("Invalid data format received from API");
+    }
+
+    employeeData = rawList.map(normalizeEmployeeRow).filter((row) => row.empId);
 
     const timeStr = new Date().toLocaleString("en-IN", {
       day: "2-digit",
@@ -47,19 +52,25 @@ async function loadEmployeeData() {
 
     const dataStamp = document.getElementById("dataStamp");
     if (dataStamp) {
-      dataStamp.textContent = (isLive ? "🟢 Live Sheet · " : "Updated ") + timeStr;
-      dataStamp.title = isLive ? "Connected to Google Sheet: Dashboard" : "Loaded from local file";
+      dataStamp.textContent = "🟢 Live API · " + timeStr;
+      dataStamp.title = "Connected to Google Apps Script API";
     }
 
     // Fire a single event; each view's own file listens and renders itself
     document.dispatchEvent(new CustomEvent("data:ready", { detail: employeeData }));
   } catch (err) {
     console.error("Failed to load employee data:", err);
-    document.getElementById("dataStamp").textContent = "Data failed to load";
+    const dataStamp = document.getElementById("dataStamp");
+    if (dataStamp) {
+      dataStamp.textContent = "Data failed to load";
+      dataStamp.title = err.message || "Failed to load data";
+    }
     const stamp = document.getElementById("kpiStrip");
     if (stamp) {
       stamp.innerHTML =
-        '<div style="padding:8px 4px;color:#B5502E;font-size:13px;">Could not load employee data. Please verify your Google Sheet sharing settings or internet connection.</div>';
+        '<div style="padding:8px 4px;color:#B5502E;font-size:13px;">Could not load employee data. ' +
+        escapeHtmlLocalData(err.message || "Please verify your Apps Script Web App deployment or internet connection.") +
+        '</div>';
     }
   }
 }
@@ -115,6 +126,7 @@ function normalizeEmployeeRow(row) {
     workMode: get("Work Mode", "Workmode"),
     employmentType: get("Employement type", "Employment type", "Employment Type"),
     language: get("Language", "Languages", "Language Known", "Languages Known"),
+    gender: get("Gender", "Sex") || "Unspecified",
     status: get("Status") || "Active",
   };
 }
