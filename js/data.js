@@ -52,7 +52,7 @@ async function loadEmployeeData() {
 
     const dataStamp = document.getElementById("dataStamp");
     if (dataStamp) {
-      dataStamp.textContent = "🟢 Live API · " + timeStr;
+      dataStamp.innerHTML = '<i class="bi bi-circle-fill text-success me-1" style="font-size:8px;"></i> Live API · ' + timeStr;
       dataStamp.title = "Connected to Google Apps Script API";
     }
 

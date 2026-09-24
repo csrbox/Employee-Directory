@@ -84,20 +84,51 @@ function fillSelectPreserving(id, values) {
   select.value = values.includes(current) ? current : "";
 }
 
-/** Renders the table body from a given (already filtered) array. */
+let directoryCurrentPage = 1;
+const DIRECTORY_PAGE_SIZE = 20;
+let lastFilteredDirectoryRows = [];
+
+/** Renders the table body from a given (already filtered) array with pagination. */
 function renderTable(rows) {
+  lastFilteredDirectoryRows = rows || [];
   const tbody = document.getElementById("empTableBody");
   const countEl = document.getElementById("resultCount");
+  const summaryEl = document.getElementById("directoryPaginationSummary");
+  const paginationEl = document.getElementById("directoryPagination");
   if (!tbody) return;
 
-  if (countEl) countEl.textContent = "👥 " + rows.length + " of " + directoryData.length + " employees";
+  const totalItems = lastFilteredDirectoryRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / DIRECTORY_PAGE_SIZE));
 
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="padding:28px;text-align:center;color:#5B6B79;">🔍 No employees match these filters.</td></tr>';
+  if (directoryCurrentPage > totalPages) {
+    directoryCurrentPage = totalPages;
+  }
+  if (directoryCurrentPage < 1) {
+    directoryCurrentPage = 1;
+  }
+
+  const startIndex = (directoryCurrentPage - 1) * DIRECTORY_PAGE_SIZE;
+  const pageRows = lastFilteredDirectoryRows.slice(startIndex, startIndex + DIRECTORY_PAGE_SIZE);
+
+  if (countEl) {
+    countEl.innerHTML = `<i class="bi bi-people-fill text-primary me-1"></i><strong>${totalItems}</strong> matching employees (of ${directoryData.length} total)`;
+  }
+
+  if (summaryEl) {
+    if (totalItems > 0) {
+      summaryEl.textContent = `Page ${directoryCurrentPage} of ${totalPages} (Showing ${startIndex + 1}–${Math.min(startIndex + DIRECTORY_PAGE_SIZE, totalItems)})`;
+    } else {
+      summaryEl.textContent = "";
+    }
+  }
+
+  if (totalItems === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:36px;text-align:center;color:#64748B;"><i class="bi bi-search me-2" style="font-size:18px;"></i>No employees match these filters.</td></tr>';
+    if (paginationEl) paginationEl.innerHTML = "";
     return;
   }
 
-  tbody.innerHTML = rows.map((emp) => `
+  tbody.innerHTML = pageRows.map((emp) => `
     <tr tabindex="0" data-empid="${escapeHtml(emp.empId)}">
       <td class="emp-name-cell" data-label="Name">
         ${escapeHtml(emp.fullName)}
@@ -105,7 +136,7 @@ function renderTable(rows) {
       </td>
       <td class="col-designation" data-label="Designation">${escapeHtml(emp.designation)}</td>
       <td class="col-org" data-label="Organisation">${escapeHtml(emp.organisation)}</td>
-      <td class="col-location" data-label="Location"><span class="location-cell-content">📍 ${escapeHtml(emp.mapLocation || emp.location)}</span></td>
+      <td class="col-location" data-label="Location"><span class="location-cell-content"><i class="bi bi-geo-alt-fill text-danger me-1"></i>${escapeHtml(emp.mapLocation || emp.location)}</span></td>
       <td class="col-workmode" data-label="Work mode">${workModeBadge(emp.workMode)}</td>
       <td class="col-email" data-label="Email" title="${escapeHtml(emp.officialEmail)}">${escapeHtml(emp.officialEmail)}</td>
       <td class="action-cell"><span class="view-btn">View</span></td>
@@ -118,18 +149,78 @@ function renderTable(rows) {
     tr.addEventListener("click", open);
     tr.addEventListener("keydown", (ev) => { if (ev.key === "Enter") open(); });
   });
+
+  renderPaginationControls(paginationEl, totalPages, directoryCurrentPage);
 }
+
+function renderPaginationControls(container, totalPages, current) {
+  if (!container) return;
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  let html = '<nav aria-label="Directory pagination"><ul class="pagination pagination-sm mb-0 gap-1">';
+
+  // Previous button
+  html += `<li class="page-item ${current === 1 ? 'disabled' : ''}">
+    <button class="page-link" type="button" ${current === 1 ? 'disabled' : ''} onclick="goToDirectoryPage(${current - 1})" aria-label="Previous">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+  </li>`;
+
+  // Page numbers logic (max 7 visible)
+  let pages = [];
+  if (totalPages <= 7) {
+    for (let p = 1; p <= totalPages; p++) pages.push(p);
+  } else {
+    pages.push(1);
+    if (current > 3) pages.push("...");
+    const start = Math.max(2, current - 1);
+    const end = Math.min(totalPages - 1, current + 1);
+    for (let p = start; p <= end; p++) pages.push(p);
+    if (current < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+  }
+
+  pages.forEach((p) => {
+    if (p === "...") {
+      html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+    } else {
+      const active = p === current ? "active" : "";
+      html += `<li class="page-item ${active}"><button class="page-link" type="button" onclick="goToDirectoryPage(${p})">${p}</button></li>`;
+    }
+  });
+
+  // Next button
+  html += `<li class="page-item ${current === totalPages ? 'disabled' : ''}">
+    <button class="page-link" type="button" ${current === totalPages ? 'disabled' : ''} onclick="goToDirectoryPage(${current + 1})" aria-label="Next">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </li>`;
+
+  html += '</ul></nav>';
+  container.innerHTML = html;
+}
+
+window.goToDirectoryPage = function (page) {
+  directoryCurrentPage = page;
+  renderTable(lastFilteredDirectoryRows);
+  const tableWrap = document.querySelector(".table-wrap");
+  if (tableWrap) tableWrap.scrollTop = 0;
+};
 
 function workModeBadge(mode) {
   if (!mode) return "";
   const lower = mode.toLowerCase();
-  let cls = "badge-office", emoji = "🏢";
-  if (lower.includes("home")) { cls = "badge-wfh"; emoji = "🏠"; }
-  else if (lower.includes("hybrid")) { cls = "badge-hybrid"; emoji = "🔀"; }
-  return `<span class="badge-workmode ${cls}">${emoji} ${escapeHtml(mode)}</span>`;
+  let cls = "badge-office", icon = '<i class="bi bi-buildings me-1"></i>';
+  if (lower.includes("home")) { cls = "badge-wfh"; icon = '<i class="bi bi-house-door-fill me-1"></i>'; }
+  else if (lower.includes("hybrid")) { cls = "badge-hybrid"; icon = '<i class="bi bi-shuffle me-1"></i>'; }
+  return `<span class="badge-workmode ${cls}">${icon}${escapeHtml(mode)}</span>`;
 }
 
 function applyDirectoryFilters() {
+  directoryCurrentPage = 1;
   refreshDirectoryFilterOptions();
   renderTable(getFilteredDirectoryData());
 }

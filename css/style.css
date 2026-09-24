@@ -46,6 +46,13 @@ a {
   color: inherit;
 }
 
+/* Bootstrap Icons alignment helper */
+.bi {
+  display: inline-block;
+  vertical-align: -0.125em;
+  fill: currentColor;
+}
+
 /* ===================== APP SHELL ===================== */
 .app-shell {
   display: flex;
@@ -174,8 +181,9 @@ a {
 /* ---------- Main content ---------- */
 .main-content {
   flex-grow: 1;
+  min-width: 0;
   padding: 34px 44px 60px;
-  max-width: 1200px;
+  max-width: 1280px;
 }
 
 .view-header {
@@ -509,10 +517,35 @@ a {
   border-color: #EBC8BC;
 }
 
+/* ===================== DIRECTORY STICKY BAR & CONTROLS ===================== */
+.directory-sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--paper);
+  padding: 12px 0 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+
+.directory-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
 .result-count {
   font-size: 12.5px;
   color: var(--slate);
-  margin: 0 0 12px;
+  margin: 0;
+}
+
+.pagination-summary {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slate);
 }
 
 /* ===================== TABLE ===================== */
@@ -521,6 +554,9 @@ a {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   overflow-x: auto;
+  max-height: 720px;
+  overflow-y: auto;
+  position: relative;
 }
 
 .emp-table {
@@ -531,14 +567,19 @@ a {
 }
 
 .emp-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   text-align: left;
   padding: 12px 14px;
+  background: #F7FAF6;
   background: linear-gradient(180deg, #EEF6EC, #F7FAF6);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--line);
   font-weight: 700;
   color: var(--brand-blue-dark);
   font-size: 12px;
   white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .emp-table tbody tr {
@@ -664,6 +705,66 @@ a {
 .view-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(27, 117, 188, 0.25);
+}
+
+/* ===================== PAGINATION STYLES ===================== */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 6px;
+  align-items: center;
+}
+
+.page-item {
+  display: inline-block;
+}
+
+.page-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-blue-dark);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  font-family: inherit;
+}
+
+.page-link:hover:not(:disabled) {
+  background: #EEF6EC;
+  border-color: var(--brand-green);
+  color: var(--brand-blue-dark);
+}
+
+.page-item.active .page-link {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(27, 117, 188, 0.25);
+  cursor: default;
+}
+
+.page-item.disabled .page-link {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* ===================== PROFILE VIEW ===================== */
@@ -839,7 +940,64 @@ a {
   display: block;
 }
 
-/* ===================== APP FOOTER (DESKTOP) ===================== */
+/* ===================== ENTITY LOGOS RAIL (DESKTOP) ===================== */
+.entity-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 102px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: var(--paper-raised);
+  border-left: 1px solid var(--line);
+  padding: 24px 8px 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+
+.entity-rail-logos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.entity-rail-item {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.entity-rail-item:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(27, 117, 188, 0.18);
+  border-color: var(--brand-teal);
+}
+
+.entity-rail-item img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ===================== APP FOOTER (BOTTOM ON MOBILE/TABLET) ===================== */
 .app-footer {
   margin-top: 48px;
   padding: 24px 20px;
@@ -878,6 +1036,27 @@ a {
 
 .footer-logo-item img:hover {
   transform: scale(1.06);
+}
+
+/* Visibility toggling: Desktop right rail (>= 1200px) vs Bottom footer (< 1200px) */
+@media (min-width: 1200px) {
+  .entity-rail {
+    display: flex;
+  }
+
+  .app-footer {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1199px) {
+  .entity-rail {
+    display: none !important;
+  }
+
+  .app-footer {
+    display: flex;
+  }
 }
 
 /* ===================== RESPONSIVE (MOBILE & TABLET) ===================== */
@@ -1147,6 +1326,12 @@ a {
     background: transparent;
     border-radius: 0;
     overflow: visible;
+    max-height: none;
+  }
+
+  .directory-sticky-bar {
+    top: 92px;
+    z-index: 80;
   }
 
   .emp-table thead {

@@ -12,6 +12,8 @@
     rel="stylesheet">
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <!-- Chart.js -- pinned to a known-stable published version -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -29,7 +31,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 
-  <link rel="stylesheet" href="css/style.css?v=2.1">
+  <link rel="stylesheet" href="css/style.css?v=2.2">
 </head>
 
 <body>
@@ -51,13 +53,13 @@
 
       <div class="nav-links">
         <a href="#/dashboard" class="nav-link" data-route="dashboard">
-          <span class="nav-icon">📊</span><span class="nav-label">Overview</span>
+          <span class="nav-icon"><i class="bi bi-bar-chart-fill"></i></span><span class="nav-label">Overview</span>
         </a>
         <a href="#/directory" class="nav-link" data-route="directory">
-          <span class="nav-icon">📇</span><span class="nav-label">Directory</span>
+          <span class="nav-icon"><i class="bi bi-people-fill"></i></span><span class="nav-label">Directory</span>
         </a>
         <a href="#/profile" class="nav-link" data-route="profile">
-          <span class="nav-icon">🪪</span><span class="nav-label">Profile</span>
+          <span class="nav-icon"><i class="bi bi-person-badge-fill"></i></span><span class="nav-label">Profile</span>
         </a>
       </div>
 
@@ -77,8 +79,8 @@
             <div class="team-hero-overlay"></div>
           </div>
           <div class="team-hero-content">
-            <span class="team-hero-badge">📸 Meet Our Team</span>
-            <h1>👋 Team Overview</h1>
+            <span class="team-hero-badge"><i class="bi bi-camera-fill me-1"></i> Meet Our Team</span>
+            <h1>Team Overview</h1>
             <p class="view-sub">A live read of who's on the team, where, and how they work.</p>
           </div>
         </header>
@@ -86,21 +88,24 @@
         <!-- KPI strip -->
         <div class="kpi-strip" id="kpiStrip">
           <div class="kpi">
-            <span class="kpi-emoji" style="background:#E7F1FB;">👥</span>
+            <span class="kpi-emoji" style="background:#E7F1FB;"><i class="bi bi-people-fill"
+                style="color:#1B75BC; font-size:22px;"></i></span>
             <div class="kpi-text">
               <span class="kpi-value" id="kpiTotal">–</span>
               <span class="kpi-label">Employees</span>
             </div>
           </div>
           <div class="kpi">
-            <span class="kpi-emoji" style="background:#EEF7E2;">🏢</span>
+            <span class="kpi-emoji" style="background:#EEF7E2;"><i class="bi bi-buildings-fill"
+                style="color:#6A9E25; font-size:22px;"></i></span>
             <div class="kpi-text">
               <span class="kpi-value" id="kpiOrgs">–</span>
               <span class="kpi-label">Organisations</span>
             </div>
           </div>
           <div class="kpi">
-            <span class="kpi-emoji" style="background:#E3F5F3;">📍</span>
+            <span class="kpi-emoji" style="background:#E3F5F3;"><i class="bi bi-geo-alt-fill"
+                style="color:#2CA6A4; font-size:22px;"></i></span>
             <div class="kpi-text">
               <span class="kpi-value" id="kpiLocations">–</span>
               <span class="kpi-label">Locations</span>
@@ -112,7 +117,7 @@
         <div class="chart-grid" id="chartGrid">
           <div class="chart-card chart-card-wide" style="--accent:#1B75BC;">
             <div class="chart-card-header">
-              <h3>🏢 Headcount by organisation</h3>
+              <h3><i class="bi bi-buildings me-2 text-primary"></i>Headcount by organisation</h3>
               <span class="chart-scroll-hint">Click bar to view list</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartOrg" width="600" height="230"></canvas></div>
@@ -120,7 +125,7 @@
 
           <div class="chart-card" style="--accent:#8DC63F;">
             <div class="chart-card-header">
-              <h3>💼 Work mode</h3>
+              <h3><i class="bi bi-briefcase-fill me-2 text-success"></i>Work mode</h3>
               <span class="chart-scroll-hint">Click slice to view list</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartWorkMode" width="400" height="230"></canvas></div>
@@ -128,7 +133,7 @@
 
           <div class="chart-card" style="--accent:#EC4899;">
             <div class="chart-card-header">
-              <h3>👤 Gender proportion</h3>
+              <h3><i class="bi bi-gender-ambiguous me-2" style="color:#EC4899;"></i>Gender proportion</h3>
               <span class="chart-scroll-hint">Click slice to view list</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartGender" width="400" height="230"></canvas></div>
@@ -136,7 +141,7 @@
 
           <div class="chart-card" style="--accent:#2CA6A4;">
             <div class="chart-card-header">
-              <h3>🪪 Designation Mix</h3>
+              <h3><i class="bi bi-person-vcard-fill me-2" style="color:#2CA6A4;"></i>Designation Mix</h3>
               <span class="chart-scroll-hint" id="levelCountBadge">Scrollable ↕</span>
             </div>
             <div class="chart-scroll-wrap">
@@ -148,7 +153,7 @@
 
           <div class="chart-card" style="--accent:#F2A93B;">
             <div class="chart-card-header">
-              <h3>⏳ Experience distribution with CSRBOX</h3>
+              <h3><i class="bi bi-hourglass-split me-2 text-warning"></i>Experience distribution with CSRBOX</h3>
               <span class="chart-scroll-hint">Click bar to view list</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartTenure" width="400" height="230"></canvas></div>
@@ -156,7 +161,7 @@
 
           <div class="chart-card" style="--accent:#E4572E;">
             <div class="chart-card-header">
-              <h3>📍 Top locations</h3>
+              <h3><i class="bi bi-geo-alt-fill me-2 text-danger"></i>Top locations</h3>
               <span class="chart-scroll-hint" id="locationCountBadge">Scrollable ↕</span>
             </div>
             <div class="chart-scroll-wrap chart-scroll-wrap-tall" id="wrapScrollLocation">
@@ -169,50 +174,50 @@
           <div class="chart-card" style="--accent:#1B75BC;" id="cardIndiaMap">
             <div class="chart-card-header">
               <div>
-                <h3 style="display:inline-block; margin-right:6px;">📍 Employee Locations</h3>
+                <h3 style="display:inline-block; margin-right:6px;"><i
+                    class="bi bi-pin-map-fill me-2 text-primary"></i>Employee Locations</h3>
                 <span class="chart-scroll-hint">Click a marker to view employees</span>
               </div>
+
             </div>
             <div id="indiaMapWrap" class="map-container-wrap map-container-tall">
               <div id="indiaMap"></div>
             </div>
           </div>
 
-
-          <!--
-          <div class="chart-card chart-card-wide" style="--accent:#6C63FF;">
-            <div class="chart-card-header">
-              <h3>📈 Joining trend</h3>
-              <span class="chart-scroll-hint">Click point to view list</span>
-            </div>
-            <div class="chart-canvas-wrap"><canvas id="chartJoining" width="600" height="230"></canvas></div>
-          </div>
-          -->
         </div>
       </section>
 
       <!-- ---------------- DIRECTORY VIEW ---------------- -->
       <section id="view-directory" class="view" style="display:none;">
         <header class="view-header gradient-header">
-          <h1>📇 Directory</h1>
+          <h1><i class="bi bi-person-lines-fill me-2 text-primary"></i>Directory</h1>
           <p class="view-sub">Search or filter to find anyone on the team — tap a row to open their profile.</p>
         </header>
 
-        <div class="filter-bar">
-          <input type="text" id="searchName" class="filter-input filter-input-wide" placeholder="🔎 Search by name…">
-          <select id="filterOrg" class="filter-input">
-            <option value="">🏢 Organisation</option>
-          </select>
-          <select id="filterLocation" class="filter-input">
-            <option value="">📍 Location</option>
-          </select>
-          <select id="filterLevel" class="filter-input">
-            <option value="">🪪 Designation</option>
-          </select>
-          <button id="clearFilters" class="filter-clear">✕ Clear</button>
+        <!-- Sticky Search & Filter Bar -->
+        <div class="directory-sticky-bar" id="directoryStickyBar">
+          <div class="filter-bar">
+            <div class="filter-input-wrap filter-input-wide">
+              <i class="bi bi-search filter-icon"></i>
+              <input type="text" id="searchName" class="filter-input" placeholder="Search by name…">
+            </div>
+            <select id="filterOrg" class="filter-input">
+              <option value="">Organisation</option>
+            </select>
+            <select id="filterLocation" class="filter-input">
+              <option value="">Location</option>
+            </select>
+            <select id="filterLevel" class="filter-input">
+              <option value="">Designation</option>
+            </select>
+            <button id="clearFilters" class="filter-clear"><i class="bi bi-x-circle me-1"></i>Clear</button>
+          </div>
+          <div class="directory-meta-row d-flex justify-content-between align-items-center">
+            <p class="result-count mb-0" id="resultCount"></p>
+            <div id="directoryPaginationSummary" class="pagination-summary text-muted small"></div>
+          </div>
         </div>
-
-        <p class="result-count" id="resultCount"></p>
 
         <div class="table-wrap">
           <table class="emp-table" id="empTable">
@@ -230,38 +235,45 @@
             <tbody id="empTableBody"></tbody>
           </table>
         </div>
+
+        <!-- Directory Pagination Controls -->
+        <div id="directoryPagination" class="pagination-wrap mt-3 d-flex justify-content-center"></div>
       </section>
 
       <!-- ---------------- PROFILE VIEW ---------------- -->
       <section id="view-profile" class="view" style="display:none;">
         <header class="view-header gradient-header">
-          <h1>🪪 Employee Profile</h1>
+          <h1><i class="bi bi-person-badge-fill me-2 text-primary"></i>Employee Profile</h1>
           <p class="view-sub">Pick anyone from the team to see their full profile.</p>
         </header>
 
         <div class="filter-bar profile-filter-bar">
-          <input type="text" id="profileSearchName" class="filter-input filter-input-wide"
-            placeholder="🔎 Search employee by name, ID, title…" autocomplete="off">
+          <div class="filter-input-wrap filter-input-wide">
+            <i class="bi bi-search filter-icon"></i>
+            <input type="text" id="profileSearchName" class="filter-input"
+              placeholder="Search employee by name, ID, title…" autocomplete="off">
+          </div>
           <select id="profileFilterOrg" class="filter-input">
-            <option value="">🏢 Organisation</option>
+            <option value="">Organisation</option>
           </select>
           <select id="profileFilterLocation" class="filter-input">
-            <option value="">📍 Location</option>
+            <option value="">Location</option>
           </select>
           <select id="profileFilterLevel" class="filter-input">
-            <option value="">🪪 Designation</option>
+            <option value="">Designation</option>
           </select>
           <select id="profileSelectEmployee" class="filter-input filter-input-wide">
-            <option value="">👤 Select employee…</option>
+            <option value="">Select employee…</option>
           </select>
-          <button id="profileClearFilters" class="filter-clear">✕ Clear</button>
+          <button id="profileClearFilters" class="filter-clear"><i class="bi bi-x-circle me-1"></i>Clear</button>
         </div>
 
         <div id="profileContent"></div>
       </section>
 
-      <!-- ============ APP FOOTER (7 LOGOS) ============ -->
-      <footer class="app-footer">
+      <!-- ============ APP FOOTER (MOBILE ONLY) ============ -->
+      <footer class="app-footer" id="appFooter">
+
         <div class="footer-logos-track">
           <div class="footer-logo-item" title="CSRBOX">
             <img src="logos/csrbox.png" onerror="this.onerror=null; this.src='logos/csrbox.svg';" alt="CSRBOX" />
@@ -294,6 +306,41 @@
       </footer>
 
     </main>
+
+    <!-- ============ RIGHT SIDE ENTITY LOGOS RAIL (DESKTOP) ============ -->
+    <aside class="entity-rail" id="entityRail" title="CSRBOX Group Entities">
+      <!-- <span class="entity-rail-badge">ENTITIES</span> -->
+      <div class="entity-rail-logos">
+        <div class="entity-rail-item" title="CSRBOX">
+          <img src="logos/csrbox.png" onerror="this.onerror=null; this.src='logos/csrbox.svg';" alt="CSRBOX" />
+        </div>
+        <div class="entity-rail-item" title="Bharat Cares">
+          <img src="logos/bharat-cares.png" onerror="this.onerror=null; this.src='logos/bharat-cares.svg';"
+            alt="Bharat Cares" />
+        </div>
+        <div class="entity-rail-item" title="Impact Practice">
+          <img src="logos/impact-practice.png" onerror="this.onerror=null; this.src='logos/impact-practice.svg';"
+            alt="Impact Practice" />
+        </div>
+        <div class="entity-rail-item" title="IndiGive Foundation">
+          <img src="logos/indigive.png" onerror="this.onerror=null; this.src='logos/indigive.svg';"
+            alt="IndiGive Foundation" />
+        </div>
+        <div class="entity-rail-item" title="The Godavari Initiative">
+          <img src="logos/godavari.png" onerror="this.onerror=null; this.src='logos/godavari.svg';"
+            alt="The Godavari Initiative" />
+        </div>
+        <div class="entity-rail-item" title="One Purpose">
+          <img src="logos/one-purpose.png" onerror="this.onerror=null; this.src='logos/one-purpose.svg';"
+            alt="One Purpose" />
+        </div>
+        <div class="entity-rail-item" title="Scholars Box">
+          <img src="logos/scholars-box.png" onerror="this.onerror=null; this.src='logos/scholars-box.svg';"
+            alt="Scholars Box" />
+        </div>
+      </div>
+    </aside>
+
   </div>
 
   <!-- ============ DRILL-DOWN MODAL ============ -->
@@ -304,11 +351,12 @@
           <h3 id="modalTitle" class="drilldown-modal-title">Employees</h3>
           <span id="modalCountBadge" class="drilldown-count-badge">0 Employees</span>
         </div>
-        <button id="modalCloseBtn" class="drilldown-close-btn" aria-label="Close modal">✕</button>
+        <button id="modalCloseBtn" class="drilldown-close-btn" aria-label="Close modal"><i
+            class="bi bi-x-lg"></i></button>
       </div>
 
       <div class="drilldown-modal-toolbar">
-        <input type="text" id="modalSearchInput" class="drilldown-search-input" placeholder="🔎 Search in this list…"
+        <input type="text" id="modalSearchInput" class="drilldown-search-input" placeholder="Search in this list…"
           autocomplete="off" />
         <span id="modalShowingCount" class="drilldown-showing-count"></span>
       </div>

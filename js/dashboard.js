@@ -48,7 +48,7 @@ function safeRenderMap(containerId, renderFn) {
     console.error("Map render failed for #" + containerId, err);
     const el = document.getElementById(containerId);
     if (el) {
-      el.innerHTML = '<div class="chart-error" style="padding:24px;text-align:center;">⚠️ Couldn\'t load India Map: ' + escapeHtmlLocal(err.message) + '</div>';
+      el.innerHTML = '<div class="chart-error" style="padding:24px;text-align:center;"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Couldn\'t load India Map: ' + escapeHtmlLocal(err.message) + '</div>';
     }
   }
 }
@@ -69,7 +69,7 @@ function safeRender(canvasId, renderFn) {
     const canvas = document.getElementById(canvasId);
     const wrap = canvas ? canvas.closest(".chart-canvas-wrap") : null;
     if (wrap) {
-      wrap.innerHTML = '<div class="chart-error">⚠️ Couldn\'t draw this chart: ' + escapeHtmlLocal(err.message) + "</div>";
+      wrap.innerHTML = '<div class="chart-error"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Couldn\'t draw this chart: ' + escapeHtmlLocal(err.message) + "</div>";
     }
   }
 }
@@ -108,22 +108,39 @@ function renderOrgChart(data) {
         backgroundColor: PALETTE[0],
         borderRadius: 6,
         maxBarThickness: 38,
+        minBarLength: 12,
       }],
     },
     options: {
       ...baseBarOptions(),
-      onHover: (event, chartElement) => {
-        event.native.target.style.cursor = chartElement && chartElement[0] ? "pointer" : "default";
+      interaction: {
+        mode: "index",
+        intersect: false,
       },
-      onClick: (event, elements) => {
-        if (!elements || !elements.length) return;
-        const idx = elements[0].index;
+      onHover: (event) => {
+        const points = chartOrgInstance.getElementsAtEventForMode(
+          event,
+          "index",
+          { intersect: false },
+          true
+        );
+        event.native.target.style.cursor = points && points.length ? "pointer" : "default";
+      },
+      onClick: (event) => {
+        const points = chartOrgInstance.getElementsAtEventForMode(
+          event,
+          "index",
+          { intersect: false },
+          true
+        );
+        if (!points || !points.length) return;
+        const idx = points[0].index;
         const orgName = labels[idx];
         if (!orgName) return;
 
         const filtered = data.filter((d) => (d.organisation || "Unspecified") === orgName);
         openDrillDownModal({
-          title: `🏢 ${orgName}`,
+          title: `<i class="bi bi-buildings me-2 text-primary"></i>${escapeHtmlLocal(orgName)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -180,7 +197,7 @@ function renderWorkModeChart(data) {
 
         const filtered = data.filter((d) => (d.workMode || "Unspecified") === mode);
         openDrillDownModal({
-          title: `💼 Work Mode: ${mode}`,
+          title: `<i class="bi bi-briefcase-fill me-2 text-primary"></i>Work Mode: ${escapeHtmlLocal(mode)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -258,7 +275,7 @@ function renderGenderChart(data) {
 
         const filtered = data.filter((d) => (d.gender || "Unspecified") === genderVal);
         openDrillDownModal({
-          title: `👤 Gender: ${genderVal}`,
+          title: `<i class="bi bi-gender-ambiguous me-2 text-primary"></i>Gender: ${escapeHtmlLocal(genderVal)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -308,7 +325,7 @@ function renderLevelChart(data) {
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
   const badge = document.getElementById("levelCountBadge");
-  if (badge) badge.textContent = sorted.length + " designations ↕";
+  if (badge) badge.textContent = sorted.length + " designations";
 
   // Dynamic canvas height based on number of items for smooth vertical scroll
   const wrap = document.getElementById("wrapChartLevel");
@@ -347,7 +364,7 @@ function renderLevelChart(data) {
 
         const filtered = data.filter((d) => (d.level || "Unspecified") === desigLevel);
         openDrillDownModal({
-          title: `🪪 ${desigLevel}`,
+          title: `<i class="bi bi-person-vcard-fill me-2 text-primary"></i>${escapeHtmlLocal(desigLevel)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -444,7 +461,7 @@ function renderTenureChart(data) {
         });
 
         openDrillDownModal({
-          title: `⏳ Experience: ${bucket}`,
+          title: `<i class="bi bi-hourglass-split me-2 text-primary"></i>Experience: ${escapeHtmlLocal(bucket)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -486,7 +503,7 @@ function renderLocationChart(data) {
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
   const badge = document.getElementById("locationCountBadge");
-  if (badge) badge.textContent = sorted.length + " locations ↕";
+  if (badge) badge.textContent = sorted.length + " locations";
 
   // Dynamic canvas height based on number of items for smooth vertical scroll
   const wrap = document.getElementById("wrapChartLocation");
@@ -525,7 +542,7 @@ function renderLocationChart(data) {
 
         const filtered = data.filter((d) => (d.mapLocation || d.location || "Unspecified") === locName);
         openDrillDownModal({
-          title: `📍 ${locName}`,
+          title: `<i class="bi bi-geo-alt-fill me-2 text-primary"></i>${escapeHtmlLocal(locName)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -928,7 +945,7 @@ function renderIndiaMap(data) {
 
     // Tooltip
     circle.bindTooltip(
-      `<strong>📍 ${escapeHtmlLocal(locName)}</strong><br>${count} Employee${count !== 1 ? "s" : ""} <span style="opacity:0.8;font-size:11px;">(Click to view list)</span>`,
+      `<strong><i class="bi bi-geo-alt-fill text-primary me-1"></i>${escapeHtmlLocal(locName)}</strong><br>${count} Employee${count !== 1 ? "s" : ""} <span style="opacity:0.8;font-size:11px;">(Click to view list)</span>`,
       {
         direction: "top",
         offset: [0, -radius],
@@ -950,7 +967,7 @@ function renderIndiaMap(data) {
         (d) => (d.mapLocation || d.location || "Unspecified").trim() === locName
       );
       openDrillDownModal({
-        title: `📍 ${locName}`,
+        title: `<i class="bi bi-geo-alt-fill me-2 text-primary"></i>${escapeHtmlLocal(locName)}`,
         badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
         employees: filtered,
         columns: [
@@ -1046,7 +1063,7 @@ function renderJoiningTrendChart(data) {
         });
 
         openDrillDownModal({
-          title: `📈 Joined in ${displayLabel}`,
+          title: `<i class="bi bi-graph-up-arrow me-2 text-primary"></i>Joined in ${escapeHtmlLocal(displayLabel)}`,
           badgeText: `${filtered.length} Employee${filtered.length !== 1 ? "s" : ""}`,
           employees: filtered,
           columns: [
@@ -1118,7 +1135,7 @@ function openDrillDownModal({ title, badgeText, employees, columns }) {
   const badgeEl = document.getElementById("modalCountBadge");
   const searchInput = document.getElementById("modalSearchInput");
 
-  if (titleEl) titleEl.textContent = title;
+  if (titleEl) titleEl.innerHTML = title;
   if (badgeEl) badgeEl.textContent = badgeText;
   if (searchInput) searchInput.value = "";
 
@@ -1183,13 +1200,13 @@ function renderModalTable(employeesList) {
               case "designation":
                 return `<td>${escapeHtmlLocal(emp.designation || "—")}</td>`;
               case "location":
-                return `<td>📍 ${escapeHtmlLocal(emp.mapLocation || emp.location || "—")}</td>`;
+                return `<td><i class="bi bi-geo-alt-fill text-muted me-1"></i>${escapeHtmlLocal(emp.mapLocation || emp.location || "—")}</td>`;
               case "workMode":
                 return `<td>${workModePill(emp.workMode)}</td>`;
               case "orgExp":
                 return `<td>${escapeHtmlLocal(emp.orgExperienceFormatted || (emp.orgExperience !== null ? emp.orgExperience + " yrs" : "—"))}</td>`;
               case "joiningDate":
-                return `<td>📅 ${escapeHtmlLocal(emp.joiningDateRaw || "—")}</td>`;
+                return `<td><i class="bi bi-calendar-event text-muted me-1"></i>${escapeHtmlLocal(emp.joiningDateRaw || "—")}</td>`;
               case "email":
                 return emp.officialEmail
                   ? `<td><a class="drill-email-link" href="mailto:${escapeHtmlLocal(emp.officialEmail)}" onclick="event.stopPropagation();">${escapeHtmlLocal(emp.officialEmail)}</a></td>`
@@ -1222,10 +1239,10 @@ function renderModalTable(employeesList) {
 function workModePill(mode) {
   if (!mode) return "—";
   const lower = mode.toLowerCase();
-  let emoji = "🏢";
-  if (lower.includes("home")) emoji = "🏠";
-  else if (lower.includes("hybrid")) emoji = "🔀";
-  return `${emoji} ${escapeHtmlLocal(mode)}`;
+  let icon = '<i class="bi bi-buildings text-muted me-1"></i>';
+  if (lower.includes("home")) icon = '<i class="bi bi-house-door-fill text-muted me-1"></i>';
+  else if (lower.includes("hybrid")) icon = '<i class="bi bi-shuffle text-muted me-1"></i>';
+  return `<span class="work-mode-chip">${icon}${escapeHtmlLocal(mode)}</span>`;
 }
 
 let modalListenersAttached = false;

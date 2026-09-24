@@ -80,7 +80,7 @@ function refreshProfileEmployeeOptions() {
     return true;
   }).sort((a, b) => a.fullName.localeCompare(b.fullName));
 
-  select.innerHTML = `<option value="">👤 Select employee (${matches.length})…</option>`;
+  select.innerHTML = `<option value="">Select employee (${matches.length})…</option>`;
   matches.forEach((emp) => {
     const opt = document.createElement("option");
     opt.value = emp.empId;
@@ -203,14 +203,14 @@ function selectProfileEmployee(empId) {
 function renderEmptyProfileState() {
   const container = document.getElementById("profileContent");
   if (container) {
-    container.innerHTML = '<div class="empty-state">👋 Pick an employee above to view their full profile.</div>';
+    container.innerHTML = '<div class="empty-state"><i class="bi bi-person-bounding-box d-block fs-1 mb-2 text-primary"></i> Pick an employee above to view their full profile.</div>';
   }
 }
 
 function renderNotFoundProfile() {
   const container = document.getElementById("profileContent");
   if (container) {
-    container.innerHTML = '<div class="not-found">🤔 We couldn\'t find that employee. They may have left, or the link is incorrect.</div>';
+    container.innerHTML = '<div class="not-found"><i class="bi bi-search d-block fs-1 mb-2 text-muted"></i> We couldn\'t find that employee. They may have left, or the link is incorrect.</div>';
   }
 }
 
@@ -232,8 +232,16 @@ function renderProfileDetail(emp) {
 
   const rawGender = (emp.gender || "").trim();
   const hasGender = rawGender && rawGender.toLowerCase() !== "unspecified";
-  const genderIcon = rawGender.toLowerCase().startsWith("f") ? "♀️" : (rawGender.toLowerCase().startsWith("m") ? "♂️" : "👤");
+  const genderIcon = rawGender.toLowerCase().startsWith("f")
+    ? '<i class="bi bi-gender-female text-danger me-1"></i>'
+    : (rawGender.toLowerCase().startsWith("m")
+      ? '<i class="bi bi-gender-male text-primary me-1"></i>'
+      : '<i class="bi bi-person-fill text-muted me-1"></i>');
   const genderDisplay = hasGender ? rawGender : "Unspecified";
+
+  const statusIcon = isActive
+    ? '<i class="bi bi-check-circle-fill text-success me-1"></i>'
+    : '<i class="bi bi-pause-circle-fill text-warning me-1"></i>';
 
   container.innerHTML = `
     <div class="profile-header">
@@ -244,45 +252,45 @@ function renderProfileDetail(emp) {
       </div>
       <div class="profile-header-badges">
         <span class="gender-pill ${hasGender ? "" : "unspecified"}">${genderIcon} ${escapeHtml(genderDisplay)}</span>
-        <span class="status-pill ${isActive ? "" : "inactive"}">${isActive ? "✅" : "⏸️"} ${escapeHtml(emp.status)}</span>
+        <span class="status-pill ${isActive ? "" : "inactive"}">${statusIcon} ${escapeHtml(emp.status)}</span>
       </div>
     </div>
 
     <div class="profile-grid">
 
       <div class="profile-section">
-        <h4>📞 Contact</h4>
-        ${field("📧 Official email", emp.officialEmail ? `<a href="mailto:${emp.officialEmail}">${escapeHtml(emp.officialEmail)}</a>` : "—")}
-        ${field("📱 Official phone", emp.officialPhone || "—")}
-        ${field("☎️ Personal phone", emp.personalPhone || "—")}
-        ${field("📍 Location", (emp.mapLocation || emp.location) || "—")}
+        <h4><i class="bi bi-telephone-fill me-2 text-primary"></i>Contact</h4>
+        ${field("bi-envelope-fill", "Official email", emp.officialEmail ? `<a href="mailto:${emp.officialEmail}">${escapeHtml(emp.officialEmail)}</a>` : "—")}
+        ${field("bi-phone-fill", "Official phone", emp.officialPhone || "—")}
+        ${field("bi-telephone", "Personal phone", emp.personalPhone || "—")}
+        ${field("bi-geo-alt-fill", "Location", (emp.mapLocation || emp.location) || "—")}
       </div>
 
       <div class="profile-section">
-        <h4>🧭 Reporting</h4>
-        ${field("👤 Reporting manager", emp.reportingManager || "—")}
-        ${field("✉️ Manager's email", emp.reportingManagerEmail ? `<a href="mailto:${emp.reportingManagerEmail}">${escapeHtml(emp.reportingManagerEmail)}</a>` : "—")}
+        <h4><i class="bi bi-diagram-3-fill me-2 text-primary"></i>Reporting</h4>
+        ${field("bi-person-badge-fill", "Reporting manager", emp.reportingManager || "—")}
+        ${field("bi-envelope-at", "Manager's email", emp.reportingManagerEmail ? `<a href="mailto:${emp.reportingManagerEmail}">${escapeHtml(emp.reportingManagerEmail)}</a>` : "—")}
       </div>
 
       <div class="profile-section">
-        <h4>⏳ Tenure &amp; Work Details</h4>
-        ${field("🧾 Employment type", emp.employmentType || "—")}
-        ${field("💼 Work mode", emp.workMode || "—")}
-        ${field("📅 Joining date", emp.joiningDateRaw || "—")}
-        ${field("🏢 Experience with CSRBOX", emp.orgExperienceFormatted || (emp.orgExperience !== null ? emp.orgExperience + " yrs" : "—"))}
-        ${field("📈 Total experience", emp.totalExperienceFormatted || (emp.totalExperience !== null ? emp.totalExperience + " yrs" : "—"))}
+        <h4><i class="bi bi-briefcase-fill me-2 text-primary"></i>Tenure &amp; Work Details</h4>
+        ${field("bi-file-earmark-person", "Employment type", emp.employmentType || "—")}
+        ${field("bi-laptop", "Work mode", emp.workMode || "—")}
+        ${field("bi-calendar-check", "Joining date", emp.joiningDateRaw || "—")}
+        ${field("bi-building", "Experience with CSRBOX", emp.orgExperienceFormatted || (emp.orgExperience !== null ? emp.orgExperience + " yrs" : "—"))}
+        ${field("bi-graph-up-arrow", "Total experience", emp.totalExperienceFormatted || (emp.totalExperience !== null ? emp.totalExperience + " yrs" : "—"))}
       </div>
 
       <div class="profile-section">
-        <h4>🎓 Education</h4>
-        ${field("🎓 Bachelor's", emp.bachelors ? emp.bachelors + (emp.bachelorsCollege && emp.bachelorsCollege !== "NA" ? " — " + emp.bachelorsCollege : "") : "—")}
-        ${field("🎓 Master's", emp.masters && emp.masters !== "NA" ? emp.masters + (emp.mastersCollege && emp.mastersCollege !== "NA" ? " — " + emp.mastersCollege : "") : "—")}
-        ${field("📚 Other course", emp.otherCourse && emp.otherCourse !== "NA" ? emp.otherCourse : "—")}
-        ${field("🗣️ Language", emp.language || "—")}
+        <h4><i class="bi bi-mortarboard-fill me-2 text-primary"></i>Education</h4>
+        ${field("bi-mortarboard", "Bachelor's", emp.bachelors ? emp.bachelors + (emp.bachelorsCollege && emp.bachelorsCollege !== "NA" ? " — " + emp.bachelorsCollege : "") : "—")}
+        ${field("bi-mortarboard", "Master's", emp.masters && emp.masters !== "NA" ? emp.masters + (emp.mastersCollege && emp.mastersCollege !== "NA" ? " — " + emp.mastersCollege : "") : "—")}
+        ${field("bi-book-half", "Other course", emp.otherCourse && emp.otherCourse !== "NA" ? emp.otherCourse : "—")}
+        ${field("bi-translate", "Language", emp.language || "—")}
       </div>
 
       <div class="profile-section" style="grid-column: span 2;">
-        <h4>🛠️ Key skills</h4>
+        <h4><i class="bi bi-stars me-2 text-primary"></i>Key skills</h4>
         ${
           skillChips.length
             ? `<div class="skill-chip-wrap">${skillChips.map((s) => `<span class="skill-chip">${escapeHtml(s)}</span>`).join("")}</div>`
@@ -295,10 +303,10 @@ function renderProfileDetail(emp) {
 }
 
 
-function field(label, valueHtml) {
+function field(iconClass, label, valueHtml) {
   return `
     <div class="profile-field">
-      <span class="profile-field-label">${escapeHtml(label)}</span>
+      <span class="profile-field-label"><i class="bi ${iconClass} me-1 text-muted"></i> ${escapeHtml(label)}</span>
       <span class="profile-field-value">${valueHtml}</span>
     </div>
   `;
